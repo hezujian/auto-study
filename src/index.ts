@@ -28,19 +28,19 @@ export class AutoWangda {
   }
 
   async run(): Promise<void> {
-    const auth = await getAuth(this.loginData)
     loginDataList.add(this.loginData)
-    store.set('AUTH_TOKEN', auth)
+    store.set('AUTH_TOKEN', this.loginData.authToken)
+    store.set('LOGIN_DATA', this.loginData)
     logger.success('Logined')
 
     const resourceIds = await getResourceIds(this.courseId)
-    logger.success('Got Resources')
+    logger.success('Got Resources', resourceIds, this.courseId)
 
     const courses = await getCourses(resourceIds)
-    logger.success('Got Courses')
+    logger.success('Got Courses', courses)
 
     const sections = await getSections(courses)
-    logger.success('Got Sections')
+    logger.success('Got Sections', sections)
 
     logger.info('Starting...')
     runTask(sections, this.type, this.chunk_size)

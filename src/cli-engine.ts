@@ -1,15 +1,12 @@
 import { cac } from 'cac'
 import { prompt } from 'enquirer'
 import { AutoWangda } from '.'
-import { loginDataList } from './login-data-list'
-import { getDynamicPassword } from './get-dynamicPassword'
 
 const cli = cac('autoWangda')
 
 interface CLIOptions {
   '--'?: string[]
-  username?: string
-  password?: string
+  authToken?: string
   subjectId?: string
   series?: boolean
   s?: boolean
@@ -19,48 +16,30 @@ interface CLIOptions {
 cli
   .command('')
   .alias('parallel')
-  .option('--username <username>', 'Username')
-  .option('--password <password>', 'Password')
+  .option(
+    '--authToken <authToken>',
+    '授权Token,在专题学习页面获取，详见 ./使用指南.jpg'
+  )
   .option(
     '--subjectId <subjectId>',
-    'Subject ID, e.g. `xxx-xxx-xxx-xxx` in #/study/subject/detail/xxx-xxx-xxx-xxx'
+    '专题ID, 在专题学习页面的链接里获取，详见 ./使用指南.jpg  e.g. `xxx-xxx-xxx-xxx` in #/study/subject/detail/xxx-xxx-xxx-xxx'
   )
   .option('-s, --series', 'Serial request means request one by one in order')
   .option('--limit <limit>', 'The maximum number of async operations at a time')
   .action(async (options: CLIOptions) => {
-    let { username, password, subjectId } = options
-    const { series, limit } = options
-    if (!username || !password) {
-      const loginDatasMap = loginDataList.groupedLoginDatas
-      if (JSON.stringify(loginDatasMap) !== '{}') {
-        const { _u } = (await prompt({
-          name: '_u',
-          type: 'select',
-          message: '请选择登录模板',
-          choices: [...Object.keys(loginDatasMap), '']
-        })) as { _u: string }
-        username = _u
-      }
-    }
-    if (!username) {
+    let { authToken, subjectId } = options
+    const { series, limit = 10 } = options
+
+    if (!authToken) {
       const { u } = (await prompt({
         name: 'u',
         type: 'input',
-        message: '请输入手机号码/员工编号',
+        message: '请输入授权token，e.g. `xxx-xxx-xxx-xxx',
         validate: (v) => /\S+/.test(v)
       })) as { u: string }
-      username = u.trim()
+      authToken = u.trim()
     }
-    if (!password) {
-      getDynamicPassword(username)
-      const { p } = (await prompt({
-        name: 'p',
-        type: 'password',
-        message: '请输入验证码',
-        validate: (v) => /\S+/.test(v)
-      })) as { p: string }
-      password = p.trim()
-    }
+
     if (!subjectId) {
       const { s } = (await prompt({
         name: 's',
@@ -73,8 +52,7 @@ cli
     }
     const autoWangda = new AutoWangda(
       {
-        username,
-        password
+        authToken
       },
       subjectId,
       series ? 'series' : 'parallel',
@@ -83,7 +61,6 @@ cli
     autoWangda.run()
     return
   })
-
 cli.help()
 cli.version(require('../../package.json').version)
 cli.parse()

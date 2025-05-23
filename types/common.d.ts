@@ -1,10 +1,8 @@
 export interface LoginData {
   captcha?: string
   key?: string
-  password: string
   loginType?: string
-  passwordType?: string
-  username: string
+  authToken: string
 }
 
 export type Type = 'series' | 'parallel'

@@ -1,0 +1,69 @@
+name: Build and Package
+
+on:
+  push:
+    branches: [ main ]
+  release:
+    types: [ created ]
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ windows-latest, macos-latest ]
+        node-version: [ 16.x ]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'  # 添加缓存以加速依赖安装
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build application
+        run: npm run build
+        continue-on-error: true  # 如果没有 build 脚本，继续执行
+
+      - name: Install packaging tool
+        run: npm install -g pkg
+
+      - name: Package for Windows
+        if: matrix.os == 'windows-latest'
+        run: |
+          pkg . --targets node16-win-x64 -o auto-wangda-win-x64.exe
+          # 为 Windows 添加额外的版本信息（可选）
+          powershell -Command "Get-FileHash .\auto-wangda-win-x64.exe | Format-List"
+
+      - name: Package for macOS
+        if: matrix.os == 'macos-latest'
+        run: |
+          pkg . --targets node16-macos-x64,node16-macos-arm64 -o auto-wangda-macos
+          # 添加执行权限
+          chmod +x auto-wangda-macos
+          # 显示文件信息（可选）
+          file auto-wangda-macos
+
+      # - name: Package for Linux
+      #   if: matrix.os == 'ubuntu-latest'
+      #   run: |
+      #     pkg . --targets node16-linux-x64 -o auto-wangda-linux
+      #     # 添加执行权限
+      #     chmod +x auto-wangda-linux
+      #     # 显示文件信息（可选）
+      #     file auto-wangda-linux
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: auto-wangda-${{ matrix.os }}
+          path: |
+            auto-wangda-*.exe
+            auto-wangda-*
+          retention-days: 30  # 保留30天，便于下载
