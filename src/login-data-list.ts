@@ -18,7 +18,7 @@ class LoginDataList {
     for (const item of this.store) {
       if (
         item.loginType === loginData.loginType &&
-        item.username === loginData.username
+        item.authToken === loginData.authToken
       ) {
         exist = true
       }
@@ -32,7 +32,7 @@ class LoginDataList {
   }
 
   get groupedLoginDatas(): { [key: string]: LoginData[] } {
-    const loginDatasMap = groupBy(this.store, 'username')
+    const loginDatasMap = groupBy(this.store, 'authToken')
     return loginDatasMap
   }
 }
