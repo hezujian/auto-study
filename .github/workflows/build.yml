@@ -5,13 +5,29 @@ on:
     branches: [ main ]
   release:
     types: [ created ]
+  workflow_dispatch:
+    inputs:
+      build-type:
+        description: 'Build type'
+        required: true
+        default: 'production'
+        type: choice
+        options:
+          - production
+          - staging
+          - test
+      node-version:
+        description: 'Node.js version'
+        required: true
+        default: '16.x'
+        type: string
 
 jobs:
   build:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ windows-latest, macos-latest ]
+        os: [ windows, macos ]
         node-version: [ 16.x ]
 
     steps:
@@ -25,7 +41,7 @@ jobs:
           cache: 'npm'  # 添加缓存以加速依赖安装
 
       - name: Install dependencies
-        run: npm ci
+        run: npm i
 
       - name: Build application
         run: npm run build
@@ -35,14 +51,14 @@ jobs:
         run: npm install -g pkg
 
       - name: Package for Windows
-        if: matrix.os == 'windows-latest'
+        if: matrix.os == 'windows'
         run: |
           pkg . --targets node16-win-x64 -o auto-wangda-win-x64.exe
           # 为 Windows 添加额外的版本信息（可选）
           powershell -Command "Get-FileHash .\auto-wangda-win-x64.exe | Format-List"
 
       - name: Package for macOS
-        if: matrix.os == 'macos-latest'
+        if: matrix.os == 'macos'
         run: |
           pkg . --targets node16-macos-x64,node16-macos-arm64 -o auto-wangda-macos
           # 添加执行权限
@@ -51,7 +67,7 @@ jobs:
           file auto-wangda-macos
 
       # - name: Package for Linux
-      #   if: matrix.os == 'ubuntu-latest'
+      #   if: matrix.os == 'ubuntu'
       #   run: |
       #     pkg . --targets node16-linux-x64 -o auto-wangda-linux
       #     # 添加执行权限
