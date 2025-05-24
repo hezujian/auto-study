@@ -21,78 +21,28 @@ on:
         required: true
         default: '16.x'
         type: string
-
+        
+# This workflow builds and packages the application for Windows and macOS.
 jobs:
-  # 依赖准备与缓存
-  prepare:
-    runs-on: ubuntu-latest
-    outputs:
-      cache-key: ${{ steps.cache-key.outputs.cache-key }}
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Generate cache key
-        id: cache-key
-        run: |
-          echo "cache-key=$(sha256sum package-lock.json | awk '{print $1}')" >> $GITHUB_ENV
-          echo "node-version=${{ github.event.inputs.node-version || '16.x' }}" >> $GITHUB_ENV
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.node-version }}
-
-      - name: Cache node_modules
-        id: cache-node-modules
-        uses: actions/cache@v4
-        with:
-          path: |
-            node_modules
-            ~/.npm
-          key: ${{ runner.os }}-node-${{ env.cache-key }}
-          restore-keys: |
-            ${{ runner.os }}-node-
-
-      - name: Install dependencies
-        if: steps.cache-node-modules.outputs.cache-hit != 'true'
-        run: |
-          # 使用官方镜像并设置合理超时
-          npm config set registry https://registry.npmjs.org/
-          npm config set fetch-retry-mintimeout 10000
-          npm config set fetch-retry-maxtimeout 60000
-          npm ci --no-warnings --production
-
-      - name: Upload dependencies cache
-        uses: actions/upload-artifact@v4
-        with:
-          name: dependencies-${{ env.cache-key }}
-          path: node_modules
-          retention-days: 5
-
-  # Windows 构建
   build-windows:
-    needs: prepare
     runs-on: windows-latest
     timeout-minutes: 20
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Download dependencies
-        uses: actions/download-artifact@v4
-        with:
-          name: dependencies-${{ needs.prepare.outputs.cache-key }}
-          path: node_modules
-
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: ${{ github.event.inputs.node-version || '16.x' }}
+          node-version: 16.x
+
+      - name: Install dependencies
+        run: |
+          npm config set registry https://registry.npmjs.org/
+          npm ci --no-warnings
 
       - name: Build application
         run: npm run build
-        continue-on-error: true
 
       - name: Install packaging tool
         run: npm install -g pkg
@@ -107,38 +57,33 @@ jobs:
         with:
           name: auto-wangda-windows
           path: auto-wangda-win-x64.exe
-          retention-days: 30
+          retention-days: 7
 
-  # macOS 构建
   build-macos:
-    needs: prepare
     runs-on: macos-latest
     timeout-minutes: 30
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Download dependencies
-        uses: actions/download-artifact@v4
-        with:
-          name: dependencies-${{ needs.prepare.outputs.cache-key }}
-          path: node_modules
-
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: ${{ github.event.inputs.node-version || '16.x' }}
+          node-version: 16.x
+
+      - name: Install dependencies
+        run: |
+          npm config set registry https://registry.npmjs.org/
+          npm ci --no-warnings
 
       - name: Build application
         run: npm run build
-        continue-on-error: true
 
       - name: Install packaging tool
         run: npm install -g pkg
 
       - name: Package for macOS
         run: |
-          # 分别构建 x64 和 arm64 版本
           pkg . --targets node16-macos-x64 -o auto-wangda-macos-x64
           pkg . --targets node16-macos-arm64 -o auto-wangda-macos-arm64
           chmod +x auto-wangda-macos-*
@@ -149,4 +94,4 @@ jobs:
         with:
           name: auto-wangda-macos
           path: auto-wangda-macos-*
-          retention-days: 30
+          retention-days: 7
