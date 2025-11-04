@@ -10,11 +10,11 @@ interface Incomplete {
   incompleteSections: Section[]
 }
 
-const courseProgressUrl = 'api/v1/course-study/course-front/course-progress'
+const courseProgressUrl = 'api/v1/course-stu/course-front/course-progress'
 
-const videoProgressUrl = 'api/v1/course-study/course-front/video-progress'
+const videoProgressUrl = 'api/v1/course-stu/course-front/video-progress'
 
-const docProgressUrl = 'api/v1/course-study/course-front/doc-progress'
+const docProgressUrl = 'api/v1/course-stu/course-front/doc-progress'
 
 async function getIncomplete(sections: Section[]): Promise<Incomplete> {
   const chunks = Object.values(groupBy(sections, 'chunk_num'))

@@ -1,8 +1,8 @@
 import { get, post } from './http'
 
-const registerUrl = 'api/v1/course-study/course-front/register'
+const registerUrl = 'api/v1/course-stu/course-front/register'
 
-const chapterProgressUrl = 'api/v1/course-study/course-front/chapter-progress'
+const chapterProgressUrl = 'api/v1/course-stu/course-front/chapter-progress'
 
 export const getResourceIds = async (courseId: string): Promise<string[]> => {
   const {

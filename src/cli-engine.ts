@@ -38,6 +38,7 @@ cli
         validate: (v) => /\S+/.test(v)
       })) as { u: string }
       authToken = u.trim()
+      // authToken = 'Bearer__8cea3ff825c9acc52e06aa41eea95fc3'
     }
 
     if (!subjectId) {
@@ -49,6 +50,7 @@ cli
         validate: (v) => /\S+/.test(v)
       })) as { s: string }
       subjectId = s.trim()
+      // subjectId = 'fdfbfe8e-2a2f-4095-b684-2aafed516913'
     }
     const autoWangda = new AutoWangda(
       {

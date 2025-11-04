@@ -2,7 +2,7 @@ import { AxiosRequestConfig } from 'axios'
 import { fetchParallel } from './http'
 import { Section, Course } from '../types/common'
 
-const startProgressUrl = 'api/v1/course-study/course-front/start-progress/'
+const startProgressUrl = 'api/v1/course-stu/course-front/start-progress/'
 
 export const getSections = async (courses: Course[]): Promise<Section[]> => {
   // get sections of courses

@@ -1,4 +1,4 @@
-import { getAuth } from './get-auth'
+// import { getAuth } from './get-auth'
 import { getResourceIds } from './get-resourceIds'
 import { getCourses } from './get-courses'
 import { getSections } from './get-sections'

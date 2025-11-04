@@ -2,9 +2,9 @@ import { AxiosRequestConfig } from 'axios'
 import { fetchParallel } from './http'
 import { Course } from '../types/common'
 
-const registerStudyUrl = 'api/v1/course-study/course-front/registerStudy'
+const registerStudyUrl = 'api/v1/course-stu/course-front/registerStudy'
 
-const courseInfoUrl = 'api/v1/course-study/course-front/info/'
+const courseInfoUrl = 'api/v1/course-stu/course-front/info/'
 
 export const getCourses = async (resourceIds: string[]): Promise<Course[]> => {
   // get courses of resources
